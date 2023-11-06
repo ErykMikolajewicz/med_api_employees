@@ -2,10 +2,11 @@ from typing import Annotated, Any, Sequence
 from datetime import datetime
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import src.authentication.token as auth
 import src.data_access_layer.dictionaries as dal_dict
-import src.data_access_layer .general as dal_gen
+import src.data_access_layer.general as dal_gen
 import src.models.dictionaries as mod_dict
 
 
@@ -17,7 +18,7 @@ def get_dictionary(dictionary_name: str, request: Request):
         request.state.dictionary = db_dictionary
 
 
-AsyncSessionDep = Annotated[dal_gen.db_rel.AsyncSession, Depends(dal_gen.get_relational_async_session)]
+AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
 router = APIRouter(tags=['dictionaries'], dependencies=[Depends(auth.validate_token), Depends(get_dictionary)])
 
 

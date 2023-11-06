@@ -4,6 +4,7 @@ from uuid import UUID
 from math import ceil
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import src.authentication.token as auth
 import src.data_access_layer.employees as dal_employees
@@ -14,7 +15,7 @@ import src.authentication.helpers as auth_gen
 import src.databases.models as db_mod
 
 router = APIRouter(tags=['employees'], dependencies=[Depends(auth.validate_token)])
-AsyncSessionDep = Annotated[dal_gen.db_rel.AsyncSession, Depends(dal_gen.get_relational_async_session)]
+AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
 
 
 @router.post("/employees", status_code=status.HTTP_201_CREATED, response_model=mod_emp.Employee)

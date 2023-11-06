@@ -2,6 +2,7 @@ from uuid import UUID
 from typing import Annotated, Sequence
 
 from fastapi import APIRouter, status, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import src.authentication.token as auth
 import src.data_access_layer.patients as dal_pat
@@ -12,7 +13,7 @@ import src.databases.models as db_mod
 
 router = APIRouter(tags=['patients'], dependencies=[Depends(auth.validate_token)])
 
-AsyncSessionDep = Annotated[dal_gen.db_rel.AsyncSession, Depends(dal_gen.get_relational_async_session)]
+AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
 
 
 @router.patch("/verify/patients/{patient_id}", status_code=status.HTTP_200_OK)

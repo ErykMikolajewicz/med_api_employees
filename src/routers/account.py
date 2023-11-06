@@ -13,11 +13,12 @@ AuthDep = Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm
 
 
 @router.post("/employees/login")
-async def create_token(authentication_data: AuthDep):  # , session: AsyncSessionDep
+async def create_token(authentication_data: AuthDep, session: AsyncSessionDep):
     email = authentication_data.username
     password = authentication_data.password
-    id_, role_id = await authenticate(email, password)
-    if id_ is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    access_token = await add_token(id_, role_id)
+    async with session.begin():
+        id_, role_id = await authenticate(email, password, session)
+        if id_ is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        access_token = await add_token(id_, role_id, session)
     return {"access_token": access_token, "token_type": "bearer"}

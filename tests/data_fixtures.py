@@ -24,6 +24,6 @@ def employee_data():
     yield employee_data
 
 
-with open('secrets.json', 'r') as file:
+with open('./tests/secrets.json', 'r') as file:
     secrets = json.load(file)
 
