@@ -1,7 +1,7 @@
 from typing import Annotated, Any, Sequence
 from datetime import datetime
 
-from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
+from fastapi import APIRouter, status, Depends, HTTPException, Response, Request, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import src.authentication.token as auth
@@ -24,8 +24,8 @@ router = APIRouter(tags=['dictionaries'], dependencies=[Depends(auth.validate_to
 
 @router.post("/dictionaries/{dictionary_name}/{row_id}", status_code=status.HTTP_201_CREATED,
              response_model=mod_dict.Row)
-async def add_row(row_id: int, dictionary_name: str, dictionary_row: mod_dict.Row, session: AsyncSessionDep,
-                  request: Request, response: Response) -> dal_dict.DbDictionary:
+async def add_row(row_id: Annotated[int, Path(gt=0)], dictionary_name: str, dictionary_row: mod_dict.Row,
+                  session: AsyncSessionDep, request: Request, response: Response) -> dal_dict.DbDictionary:
     dictionary_row: dict[str, Any] = dictionary_row.model_dump()
     user_id = request.state.token.id
     dictionary_row['created_by_id'] = user_id
@@ -40,7 +40,7 @@ async def add_row(row_id: int, dictionary_name: str, dictionary_row: mod_dict.Ro
     return new_dictionary_row
 
 
-@router.get("/dictionaries/{dictionary_name}", status_code=status.HTTP_201_CREATED,
+@router.get("/dictionaries/{dictionary_name}", status_code=status.HTTP_200_OK,
             response_model=Sequence[mod_dict.RowLocation])
 async def get_rows(dictionary_name: str, session: AsyncSessionDep, request: Request) -> Sequence[dal_dict.DbDictionary]:
     db_dictionary = request.state.dictionary

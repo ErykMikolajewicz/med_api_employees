@@ -47,8 +47,7 @@ class Employees(Base):
         sqla.UniqueConstraint('email'),
         sqla.UniqueConstraint('pesel_or_identifier'),
 
-        sqla.CheckConstraint('last_modified_by_id is null or last_modified_by_id in (id)'),
-        sqla.CheckConstraint('created_by_id in (id)')
+        sqla.CheckConstraint('telephone is not null or business_telephone is not null')
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=sqla.text('gen_random_uuid()'))
@@ -61,10 +60,10 @@ class Employees(Base):
     telephone: Mapped[Optional[str]] = mapped_column(sqla.String(15))
     business_telephone: Mapped[Optional[str]] = mapped_column(sqla.String(15))
     email: Mapped[str] = mapped_column(sqla.String(255))
-    address: Mapped[str]
+    address: Mapped[str] = mapped_column(sqla.String(500))
     create_date: Mapped[datetime] = mapped_column(server_default=sqla.text('now()'))
-    created_by_id: Mapped[UUID]
-    last_modified_by_id: Mapped[Optional[UUID]]
+    created_by_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"))
+    last_modified_by_id: Mapped[Optional[UUID]] = mapped_column(sqla.ForeignKey("employees.id"))
     last_modified_date: Mapped[Optional[datetime]]
 
 

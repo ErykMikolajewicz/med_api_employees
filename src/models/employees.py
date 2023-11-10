@@ -8,12 +8,12 @@ class Employee(BaseModel):
     name: str = Field(min_length=2, max_length=155)
     surname: str = Field(min_length=2, max_length=255)
     role_id: int = Field(gt=0)
-    pesel_or_identifier: str = Field(min_length=3, max_length=36)
+    pesel_or_identifier: str = Field(min_length=7, max_length=36)
     birth_date: date
     telephone: Optional[str] = Field(None, min_length=9, max_length=13, pattern=r'^\+\d{10,12}|^\d{9}$')
     business_telephone: Optional[str] = Field(None, min_length=9, max_length=13, pattern=r'^\+\d{10,12}|^\d{9}$')
     email: str = Field(min_length=5, max_length=255)
-    address: str
+    address: str = Field(max_length=500)
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -58,11 +58,11 @@ class EmployeeUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=155)
     surname: Optional[str] = Field(None, min_length=2, max_length=255)
     role_id: Optional[int] = Field(None, gt=0)
-    pesel_or_identifier: Optional[str] = Field(None, min_length=3, max_length=36)
-    birth_date: Optional[date]
+    pesel_or_identifier: Optional[str] = Field(None, min_length=7, max_length=36)
+    birth_date: Optional[date] = Field(None)
     telephone: Optional[str] = Field(None, min_length=9, max_length=13, pattern=r'^\+?\d{9,12}$')
     business_telephone: Optional[str] = Field(None, min_length=9, max_length=13, pattern=r'^\+?\d{9,12}$')
     email: Optional[str] = Field(None, min_length=5, max_length=255)
-    address: Optional[str]
+    address: Optional[str] = Field(None, max_length=500)
 
     model_config = ConfigDict(from_attributes=True)

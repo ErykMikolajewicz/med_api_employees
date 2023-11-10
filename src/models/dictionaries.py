@@ -22,6 +22,6 @@ class RowLocation(NewRow):
 class RowUpdate(BaseModel):
     display_name: Optional[str] = Field(None, min_length=2, max_length=255)
     description: Optional[str] = Field(None, max_length=1000)
-    is_active: Optional[bool]
+    is_active: Optional[bool] = Field(None)
 
     model_config = ConfigDict(from_attributes=True)
