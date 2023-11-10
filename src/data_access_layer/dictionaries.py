@@ -1,7 +1,8 @@
-from typing import Any, Sequence, TypeVar, cast
+from typing import Any, Sequence, TypeVar
 
 from sqlalchemy import insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import or_
 
 from src.databases.dicts_models import DatabaseDictionary, ApplicationRoles
 
@@ -29,8 +30,8 @@ class Dictionaries:
         await self.db_session.flush()
         return result
 
-    async def get_rows(self, db_dictionary: DbDictionary) -> Sequence[DbDictionary]:
-        select_query = select(db_dictionary)
+    async def get_rows(self, db_dictionary: DbDictionary, is_active: bool) -> Sequence[DbDictionary]:
+        select_query = select(db_dictionary).where(or_(is_active is None, db_dictionary.is_active == is_active))
         dictionary_rows = await self.db_session.scalars(select_query)
         dictionary_rows = dictionary_rows.all()
         return dictionary_rows
@@ -40,12 +41,10 @@ class Dictionaries:
         dictionary_row = await self.db_session.scalar(select_query)
         return dictionary_row
 
-    async def delete_row(self, db_dictionary: DbDictionary, row_id: int) -> int:
+    async def delete_row(self, db_dictionary: DbDictionary, row_id: int):
         delete_query = delete(db_dictionary).where(db_dictionary.id == row_id)
-        delete_result = await self.db_session.execute(delete_query)
-        number_deleted_rows: int = cast(delete_result.rowcount, int)
+        await self.db_session.execute(delete_query)
         await self.db_session.flush()
-        return number_deleted_rows
 
     async def update_row(self, db_dictionary: DbDictionary, row_data: dict[str, Any],  row_id: int) -> DbDictionary:
         update_query = update(db_dictionary).where(db_dictionary.id == row_id).values(row_data).returning(db_dictionary)

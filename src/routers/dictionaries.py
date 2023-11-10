@@ -1,8 +1,9 @@
-from typing import Annotated, Any, Sequence
+from typing import Annotated, Any, Sequence, Optional
 from datetime import datetime
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request, Path
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 import src.authentication.token as auth
 import src.data_access_layer.dictionaries as dal_dict
@@ -33,7 +34,10 @@ async def add_row(row_id: Annotated[int, Path(gt=0)], dictionary_name: str, dict
     db_dictionary = request.state.dictionary
     async with session.begin():
         data_access = dal_dict.Dictionaries(session)
-        new_dictionary_row = await data_access.add_row(db_dictionary, dictionary_row)
+        try:
+            new_dictionary_row = await data_access.add_row(db_dictionary, dictionary_row)
+        except IntegrityError:
+            raise HTTPException(status_code=400, detail='introduced data violate database constraints.')
     if new_dictionary_row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     response.headers["Location"] = f"/dictionaries/{dictionary_name}/{row_id}"
@@ -42,11 +46,12 @@ async def add_row(row_id: Annotated[int, Path(gt=0)], dictionary_name: str, dict
 
 @router.get("/dictionaries/{dictionary_name}", status_code=status.HTTP_200_OK,
             response_model=Sequence[mod_dict.RowLocation])
-async def get_rows(dictionary_name: str, session: AsyncSessionDep, request: Request) -> Sequence[dal_dict.DbDictionary]:
+async def get_rows(dictionary_name: str, session: AsyncSessionDep, request: Request, is_active: Optional[bool] = None)\
+                   -> Sequence[dal_dict.DbDictionary]:
     db_dictionary = request.state.dictionary
     async with session.begin():
         data_access = dal_dict.Dictionaries(session)
-        dictionary_rows = await data_access.get_rows(db_dictionary)
+        dictionary_rows = await data_access.get_rows(db_dictionary, is_active)
     if dictionary_rows is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     for row in dictionary_rows:
@@ -60,14 +65,15 @@ async def delete_row(row_id: int, session: AsyncSessionDep, request: Request) ->
     async with session.begin():
         data_access = dal_dict.Dictionaries(session)
         dictionary_row = await data_access.get_row(db_dictionary, row_id)
-    if dictionary_row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    if dictionary_row.is_system_value:
-        message = 'Can not remove system value contact with developer team to make changes in application.'
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST(message))
-    deleted_rows = await data_access.delete_row(db_dictionary, row_id)
-    if deleted_rows == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        if dictionary_row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        else:
+            if dictionary_row.is_system_value:
+                message = 'Can not remove system value contact with developer team to make changes in application.'
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST(message))
+            else:
+                await data_access.delete_row(db_dictionary, row_id)
+
 
 
 @router.patch("/dictionaries/{dictionary_name}/{row_id}", status_code=status.HTTP_200_OK,

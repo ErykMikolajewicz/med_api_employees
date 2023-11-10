@@ -5,6 +5,7 @@ from math import ceil
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 import src.authentication.token as auth
 import src.data_access_layer.employees as dal_employees
@@ -30,7 +31,10 @@ async def add_employee(employee: mod_emp.NewEmployee, session: AsyncSessionDep, 
     del employee['confirm_password']
     async with session.begin():
         employee_data_access = dal_employees.Employees(session)
-        new_employee = await employee_data_access.add(employee)
+        try:
+            new_employee = await employee_data_access.add(employee)
+        except IntegrityError:
+            raise HTTPException(status_code=400, detail='introduced data violate database constraints.')
     employee_id = new_employee.id
     response.headers["Location"] = f"/employees/{employee_id}"
     return new_employee
