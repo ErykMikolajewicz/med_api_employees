@@ -1,19 +1,17 @@
-from datetime import datetime
 from typing import Annotated, Any, Sequence
 from uuid import UUID
-from math import ceil
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-import src.authentication.token as auth
+import src.services.authentication as auth
 import src.data_access_layer.employees as dal_employees
 import src.data_access_layer.general as dal_gen
 import src.models.employees as mod_emp
 import src.models.general as mod_gen
-import src.authentication.helpers as auth_gen
 import src.databases.models as db_mod
+from src.services.general import prepare_new_user, prepare_pagination_link, add_modification_info
 
 router = APIRouter(tags=['employees'], dependencies=[Depends(auth.validate_token)])
 AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
@@ -24,11 +22,7 @@ async def add_employee(employee: mod_emp.NewEmployee, session: AsyncSessionDep, 
                        -> db_mod.Employees:
     employee: dict[str, Any] = employee.model_dump()
     user_id = request.state.token.id
-    employee['created_by_id'] = user_id
-    hashed_password = auth_gen.hash_password(employee['password'])
-    employee['hashed_password'] = hashed_password
-    del employee['password']
-    del employee['confirm_password']
+    employee = prepare_new_user(employee, user_id)
     async with session.begin():
         employee_data_access = dal_employees.Employees(session)
         try:
@@ -50,36 +44,22 @@ async def get_employees(session: AsyncSessionDep, pagination: mod_gen.pagination
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     for employee in employees:
         employee.location = f'/employees/{employee.id}'
-    link = ''
-    page_size = pagination['page_size']
-    offset = pagination['offset']
-    if offset != 0:
-        link += f"<employees?page-number=1&page-size={page_size}>; rel=\"first\""
-    prev_page_number = int(offset/page_size)
-    if prev_page_number != 1:
-        link += f" <employees?page-number={prev_page_number}&page-size={page_size}>; rel=\"prev\""
-    page_number = offset/page_size + 1
-    next_page_number = page_number + 1
-    last_page_number = ceil(employees_number/page_size)
-    if next_page_number < last_page_number:
-        link += f" <employees?page-number={next_page_number}&page-size={page_size}>; rel=\"next\""
-    if page_number < last_page_number:
-        link += f" <employees?page-number={last_page_number}&page-size={page_size}>; rel=\"last\""
-    response.headers["Link"] = link
+    link_base = '<employees?page-number={0}&page-size={1}>; {2}'
+    links = prepare_pagination_link(link_base, pagination, employees_number)
+    response.headers["Link"] = links
     return employees
 
 
 @router.patch("/employees/{employee_id}", status_code=status.HTTP_200_OK,
               response_model=mod_emp.EmployeeUpdate)
-async def update_employee(employee_id: UUID, employee_data: mod_emp.EmployeeUpdate, session: AsyncSessionDep,
+async def update_employee(employee_id: UUID, employee_update: mod_emp.EmployeeUpdate, session: AsyncSessionDep,
                           request: Request) -> db_mod.Employees:
-    employee_data: dict[str, Any] = employee_data.model_dump(exclude_none=True)
+    employee_update: dict[str, Any] = employee_update.model_dump(exclude_none=True)
     user_id = request.state.token.id
-    employee_data['last_modified_by_id'] = user_id
-    employee_data['last_modified_date'] = datetime.now()
+    employee_update = add_modification_info(employee_update, user_id)
     async with session.begin():
         data_access = dal_employees.Employees(session)
-        employee = await data_access.update(employee_id, employee_data)
+        employee = await data_access.update(employee_id, employee_update)
     if employee is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     else:

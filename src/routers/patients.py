@@ -4,7 +4,7 @@ from typing import Annotated, Sequence
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import src.authentication.token as auth
+import src.services.authentication as auth
 import src.data_access_layer.patients as dal_pat
 import src.data_access_layer.general as dal_gen
 import src.models.patients as mod_pat

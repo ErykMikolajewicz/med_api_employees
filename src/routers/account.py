@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from src.authentication.token import authenticate, add_token
+from src.services.authentication import authenticate, add_token
 import src.data_access_layer.general as dal_gen
 
 router = APIRouter(tags=['employees_account'])

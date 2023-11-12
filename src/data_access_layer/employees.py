@@ -44,7 +44,7 @@ class Employees:
     async def delete(self, id_: UUID) -> int:
         delete_query = delete(db_mod.Employees).where(db_mod.Employees.id == id_)
         delete_result = await self.db_session.execute(delete_query)
-        number_deleted_rows: int = typ.cast(delete_result.rowcount, int)
+        number_deleted_rows: int = delete_result.rowcount # bad type hint for sqlalchemy
         await self.db_session.flush()
         return number_deleted_rows
 

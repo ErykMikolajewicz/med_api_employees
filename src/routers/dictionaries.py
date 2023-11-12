@@ -1,14 +1,14 @@
 from typing import Annotated, Any, Sequence, Optional
-from datetime import datetime
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-import src.authentication.token as auth
+import src.services.authentication as auth
 import src.data_access_layer.dictionaries as dal_dict
 import src.data_access_layer.general as dal_gen
 import src.models.dictionaries as mod_dict
+from src.services.general import prepare_value_object, add_modification_info
 
 
 def get_dictionary(dictionary_name: str, request: Request):
@@ -29,9 +29,8 @@ async def add_row(row_id: Annotated[int, Path(gt=0)], dictionary_name: str, dict
                   session: AsyncSessionDep, request: Request, response: Response) -> dal_dict.DbDictionary:
     dictionary_row: dict[str, Any] = dictionary_row.model_dump()
     user_id = request.state.token.id
-    dictionary_row['created_by_id'] = user_id
-    dictionary_row['id'] = row_id
     db_dictionary = request.state.dictionary
+    dictionary_row = prepare_value_object(dictionary_row, user_id, row_id)
     async with session.begin():
         data_access = dal_dict.Dictionaries(session)
         try:
@@ -75,19 +74,17 @@ async def delete_row(row_id: int, session: AsyncSessionDep, request: Request) ->
                 await data_access.delete_row(db_dictionary, row_id)
 
 
-
 @router.patch("/dictionaries/{dictionary_name}/{row_id}", status_code=status.HTTP_200_OK,
               response_model=mod_dict.Row)
 async def update_row(row_data: mod_dict.RowUpdate, row_id: int, session: AsyncSessionDep, request: Request)\
                     -> dal_dict.DbDictionary:
     db_dictionary = request.state.dictionary
-    row_update_data: dict[str, Any] = row_data.model_dump(exclude_none=True)
+    row_update: dict[str, Any] = row_data.model_dump(exclude_none=True)
     user_id = request.state.token.id
-    row_update_data['last_modified_by_id'] = user_id
-    row_update_data['last_modified_date'] = datetime.now()
+    row_update = add_modification_info(row_update, user_id)
     async with session.begin():
         data_access = dal_dict.Dictionaries(session)
-        dictionary_row = await data_access.update_row(db_dictionary, row_update_data, row_id)
+        dictionary_row = await data_access.update_row(db_dictionary, row_update, row_id)
     if dictionary_row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     else:
