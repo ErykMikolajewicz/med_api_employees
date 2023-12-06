@@ -1,6 +1,6 @@
 [project]
 name = "medapp"
-version = "0.0.3"
+version = "0.0.4"
 description = ""
 authors = [
     {name = "Eryk Mikołajewicz", email = "eryk.mikolajewicz@gmail.com"},
@@ -24,7 +24,6 @@ test = [
     "pytest-asyncio>=0.21.1",
     "httpx>=0.25.1",
     "Authlib>=1.2.1",
-    "pgadmin4>=7.8",
 ]
 
 [tool.pdm.scripts]
@@ -32,4 +31,3 @@ _.env_file = ".env"
 start = {call = "src.main:main"}
 test = {cmd = "pytest --tb=long tests/test.py "}
 docker_build = {cmd = "docker image build --tag=employees_api ."}
-pgadmin = {cmd = "pgadmin4"}

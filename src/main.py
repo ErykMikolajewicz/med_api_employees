@@ -1,5 +1,6 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 import uvicorn
 
 from src.data_access_layer.general import init_relational_database, close_relational_database

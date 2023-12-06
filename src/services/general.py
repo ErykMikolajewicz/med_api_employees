@@ -3,7 +3,7 @@ from uuid import UUID
 from math import ceil
 from datetime import datetime
 
-from src.services.authentication import hash_password
+from src.services.security import hash_password
 
 
 def prepare_new_user(user: dict[str, Any], user_id: UUID) -> dict[str, Any]:
