@@ -3,7 +3,7 @@ from uuid import UUID
 from math import ceil
 from datetime import datetime
 
-from src.services.security import hash_password
+from src.services.security import hash_password, create_and_hash_random_password
 
 
 def prepare_new_user(user: dict[str, Any], user_id: UUID) -> dict[str, Any]:
@@ -15,7 +15,14 @@ def prepare_new_user(user: dict[str, Any], user_id: UUID) -> dict[str, Any]:
     return user
 
 
-def prepare_pagination_link(link_base: str, pagination, employees_number: int)-> str:
+def prepare_new_patient(patient: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    patient['is_verified'] = True
+    password, hashed_password = create_and_hash_random_password()
+    patient['hashed_password'] = hashed_password
+    return patient, password
+
+
+def prepare_pagination_link(link_base: str, pagination, employees_number: int) -> str:
     links = ''
     page_size = pagination['page_size']
     offset = pagination['offset']

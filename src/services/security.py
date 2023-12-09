@@ -26,12 +26,12 @@ def get_expiration_date(expiration_in_minutes: int = 1_440) -> datetime.datetime
     return datetime.datetime.now() + datetime.timedelta(minutes=expiration_in_minutes)
 
 
-def verify_password(password: str, hashed_password: str) -> bool:
+def verify_password(password: str, hashed_password: bytes) -> bool:
     to_check = hash_password(password)
     return secrets.compare_digest(hashed_password, to_check)
 
 
-def create_and_hash_random_password() -> (str, bytes):
+def create_and_hash_random_password() -> tuple[str, bytes]:
     characters = string.printable
     password = ''.join(secrets.choice(characters) for _ in range(34))
 

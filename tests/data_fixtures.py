@@ -51,3 +51,22 @@ def string_creator() -> Callable[[int], str]:
         return random_string
 
     yield long_text
+
+
+@pytest.fixture(scope="function")
+def patient_data():
+    patient_data = {
+        'login': 'chory_kotek',
+        'name': 'mruczuś',
+        'surname': 'Miałczyński',
+        'telephone': None,
+        'email': 'kotecek123@gmail.com',
+        'address': '',
+        'sex': 'male',
+        'pesel_or_identifier': 'Koty nie mają peselu :(',
+        'birth_date': '2005-12-01'
+    }
+
+    yield patient_data
+
+

@@ -1,4 +1,4 @@
-import typing as typ
+from typing import Any, Sequence
 import datetime
 from uuid import UUID
 
@@ -13,13 +13,13 @@ class Employees:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def add(self, new_employee: dict[str, typ.Any]) -> db_mod.Employees:
+    async def add(self, new_employee: dict[str, Any]) -> db_mod.Employees:
         insert_query = insert(db_mod.Employees).values(new_employee).returning(db_mod.Employees)
         result = await self.db_session.scalar(insert_query)
         await self.db_session.flush()
         return result
 
-    async def get_many(self, pagination: dict[str, int]) -> (typ.Sequence[db_mod.Employees], int):
+    async def get_many(self, pagination: dict[str, int]) -> (Sequence[db_mod.Employees], int):
         offset = pagination['offset']
         limit = offset + pagination['page_size']
         select_query = select(db_mod.Employees).offset(offset).limit(limit)
@@ -34,7 +34,7 @@ class Employees:
         result = await self.db_session.scalar(select_query)
         return result
 
-    async def update(self, id_: UUID, employee: dict[str, typ.Any]) -> db_mod.Employees:
+    async def update(self, id_: UUID, employee: dict[str, Any]) -> db_mod.Employees:
         update_query = update(db_mod.Employees).where(db_mod.Employees.id == id_)\
                        .values(employee).returning(db_mod.Employees)
         result = await self.db_session.scalar(update_query)
@@ -53,7 +53,7 @@ class EmployeesTokens:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def add(self, new_token: dict[str, typ.Any]):
+    async def add(self, new_token: dict[str, Any]):
         insert_query = insert(db_mod.EmployeesAccessTokens).values(new_token)
         await self.db_session.execute(insert_query)
         await self.db_session.flush()

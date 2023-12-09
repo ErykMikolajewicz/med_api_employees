@@ -1,4 +1,4 @@
-FROM python:3.11-bookworm AS builder
+FROM python:3.12-bookworm AS builder
 
 RUN pip install -U pip setuptools wheel
 RUN pip install pdm
@@ -10,7 +10,7 @@ RUN mkdir __pypackages__
 RUN pdm sync --prod --no-editable
 
 
-FROM python:3.11-bookworm
+FROM python:3.12-bookworm
 
 ENV PYTHONPATH=/app/pkgs
 COPY --from=builder /app/__pypackages__/3.11/lib /app/pkgs

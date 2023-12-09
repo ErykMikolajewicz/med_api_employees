@@ -1,4 +1,4 @@
-from asyncio import DefaultEventLoopPolicy
+from asyncio import DefaultEventLoopPolicy, new_event_loop, set_event_loop
 
 import pytest
 import pytest_asyncio
@@ -8,6 +8,8 @@ from authlib.integrations.httpx_client import AsyncOAuth2Client
 
 @pytest.fixture(scope="session")
 def event_loop_policy(request):
+    loop = new_event_loop()
+    set_event_loop(loop)
     return DefaultEventLoopPolicy()
 
 

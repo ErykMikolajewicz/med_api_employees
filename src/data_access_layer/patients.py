@@ -1,8 +1,7 @@
 from typing import Any, Sequence, cast
 from uuid import UUID
 
-from sqlalchemy import update, delete, select
-from sqlalchemy.orm import defer
+from sqlalchemy import update, delete, select, insert, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import src.databases.models as db_mod
@@ -12,12 +11,21 @@ class Patients:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def get_many(self, pagination: tuple[int, int]) -> Sequence[db_mod.Patients]:
-        skip, limit = pagination
-        select_query = select(db_mod.Patients).offset(skip).limit(limit).options(defer(db_mod.Patients.hashed_password))
-        rows = await self.db_session.scalars(select_query)
-        results = rows.all()
-        return results
+    async def add(self, new_patient: dict[str, Any]) -> db_mod.Patients:
+        insert_query = insert(db_mod.Patients).values(new_patient).returning(db_mod.Patients)
+        result = await self.db_session.scalar(insert_query)
+        await self.db_session.flush()
+        return result
+
+    async def get_many(self, pagination: dict[str, int]) -> (Sequence[db_mod.Patients], int):
+        offset = pagination['offset']
+        limit = offset + pagination['page_size']
+        select_query = select(db_mod.Patients).offset(offset).limit(limit)
+        patients = await self.db_session.scalars(select_query)
+        count_query = select(func.count(db_mod.Patients.id).over())
+        patients_number = await self.db_session.scalar(count_query)
+        patients = patients.fetchall()
+        return patients, patients_number
 
     async def update(self, id_: UUID, patient: dict[str, Any]) -> db_mod.Patients:
         update_query = update(db_mod.Patients).where(db_mod.Patients.id == id_)\

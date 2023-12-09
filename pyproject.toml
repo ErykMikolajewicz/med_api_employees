@@ -29,5 +29,5 @@ test = [
 [tool.pdm.scripts]
 _.env_file = ".env"
 start = {call = "src.main:main"}
-test = {cmd = "pytest --tb=long tests/test.py "}
+test = {cmd = "pytest --tb=long tests"}
 docker_build = {cmd = "docker image build --tag=employees_api ."}
