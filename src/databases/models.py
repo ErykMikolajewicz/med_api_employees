@@ -71,12 +71,13 @@ class Appointments(Base):
     __tablename__ = 'appointments'
     __table_args__ = (
         sqla.UniqueConstraint('start', 'employee_id'),
-
+        sqla.UniqueConstraint('start', 'patient_id'),
         {'postgresql_partition_by': 'RANGE (start)', 'schema': 'patients'}
     )
 
-    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients.patients.id"), primary_key=True)
-    start: Mapped[datetime] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients.patients.id"))
+    start: Mapped[datetime]
     end: Mapped[datetime]
     employee_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"))
 

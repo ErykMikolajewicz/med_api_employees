@@ -13,9 +13,9 @@ RUN pdm sync --prod --no-editable
 FROM python:3.12-bookworm
 
 ENV PYTHONPATH=/app/pkgs
-COPY --from=builder /app/__pypackages__/3.11/lib /app/pkgs
+COPY --from=builder /app/__pypackages__/3.12/lib /app/pkgs
 
-COPY --from=builder /app/__pypackages__/3.11/bin/* /bin/
+COPY --from=builder /app/__pypackages__/3.12/bin/* /bin/
 
 WORKDIR /app
 COPY src /app/src
