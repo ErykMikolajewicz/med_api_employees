@@ -1,9 +1,10 @@
 from uuid import UUID
 from typing import Optional
-from datetime import datetime, date
+from datetime import datetime, date, time
 
 import sqlalchemy as sqla
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from src.databases.relational import Base
 
@@ -98,3 +99,28 @@ class EmployeesAccessTokens(Base):
     id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"))
     role_id: Mapped[int] = mapped_column(sqla.ForeignKey("dicts.application_roles.id"))
     expiration_date: Mapped[datetime]
+
+
+class DoctorsWorkingTime(Base):
+    __tablename__ = 'doctors_working_time'
+    __table_args__ = (
+        sqla.CheckConstraint('day_of_week_id BETWEEN 1 AND 7'),
+    )
+
+    doctor_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"), primary_key=True)
+    day_of_week_id: Mapped[int] = mapped_column(primary_key=True)
+    accepted_visit_duration = mapped_column(ARRAY(sqla.Integer))
+    work_start: Mapped[time]
+    work_end: Mapped[time]
+    work_break_start: Mapped[Optional[time]]
+    work_break_end: Mapped[Optional[time]]
+    is_working_day: Mapped[bool]
+
+
+class IndividualWorkingBreaks(Base):
+    __tablename__ = 'individual_working_breaks'
+
+    break_id: Mapped[UUID] = mapped_column(primary_key=True, server_default=sqla.text('gen_random_uuid()'))
+    doctor_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"))
+    work_break_start: Mapped[datetime]
+    work_break_end: Mapped[datetime]
