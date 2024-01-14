@@ -24,3 +24,7 @@ class DatabaseDictionary(Base):
 
 class ApplicationRoles(DatabaseDictionary):
     __tablename__ = 'application_roles'
+
+
+class SpecialistsRoles(DatabaseDictionary):
+    __tablename__ = 'specialists_roles'

@@ -71,16 +71,15 @@ class Employees(Base):
 class Appointments(Base):
     __tablename__ = 'appointments'
     __table_args__ = (
-        sqla.UniqueConstraint('start', 'employee_id'),
         sqla.UniqueConstraint('start', 'patient_id'),
         {'postgresql_partition_by': 'RANGE (start)', 'schema': 'patients'}
     )
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'))
     patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients.patients.id"))
-    start: Mapped[datetime]
+    start: Mapped[datetime] = mapped_column(primary_key=True)
     end: Mapped[datetime]
-    employee_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"))
+    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients_specialists.id"), primary_key=True)
 
 
 class PatientsAccessTokens(Base):
@@ -101,13 +100,20 @@ class EmployeesAccessTokens(Base):
     expiration_date: Mapped[datetime]
 
 
-class DoctorsWorkingTime(Base):
-    __tablename__ = 'doctors_working_time'
+class PatientsSpecialists(Base):
+    __tablename__ = 'patients_specialists'
+
+    id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"), primary_key=True)
+    role_id: Mapped[int] = mapped_column(sqla.ForeignKey("dicts.specialists_roles.id"))
+
+
+class SpecialistsWorkingTime(Base):
+    __tablename__ = 'specialists_working_time'
     __table_args__ = (
         sqla.CheckConstraint('day_of_week_id BETWEEN 1 AND 7'),
     )
 
-    doctor_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"), primary_key=True)
+    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients_specialists.id"), primary_key=True)
     day_of_week_id: Mapped[int] = mapped_column(primary_key=True)
     accepted_visit_duration = mapped_column(ARRAY(sqla.Integer))
     work_start: Mapped[time]
@@ -121,6 +127,6 @@ class IndividualWorkingBreaks(Base):
     __tablename__ = 'individual_working_breaks'
 
     break_id: Mapped[UUID] = mapped_column(primary_key=True, server_default=sqla.text('gen_random_uuid()'))
-    doctor_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("employees.id"))
+    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients_specialists.id"))
     work_break_start: Mapped[datetime]
     work_break_end: Mapped[datetime]
