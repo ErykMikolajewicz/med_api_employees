@@ -40,3 +40,9 @@ class Patients:
         await self.db_session.flush()
         number_deleted_rows: int = cast(delete_result.rowcount, int)
         return number_deleted_rows
+
+    async def get(self, patient_id) -> db_mod.Patients:
+        select_query = select(db_mod.Patients).where(db_mod.Patients.id == patient_id)
+        patient = await self.db_session.scalars(select_query)
+        patient = patient.first()
+        return patient

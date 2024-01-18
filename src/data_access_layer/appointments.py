@@ -11,12 +11,14 @@ class Appointments:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def delete(self, id_: UUID) -> int:
-        delete_query = delete(db_mod.Appointments).where(db_mod.Appointments.id == id_)
+    async def delete(self, id_: UUID) -> (int, UUID):
+        delete_query = (delete(db_mod.Appointments).where(db_mod.Appointments.id == id_).
+                        returning(db_mod.Appointments.patient_id))
         delete_result = await self.db_session.execute(delete_query)
+        patient_id = delete_result.first()
         number_deleted_rows: int = delete_result.rowcount # bad type hint for sqlalchemy
         await self.db_session.flush()
-        return number_deleted_rows
+        return number_deleted_rows, patient_id
 
     async def get_many(self, pagination, specialist_id: UUID, start: date, end: date):
         offset = pagination['offset']
