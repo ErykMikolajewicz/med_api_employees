@@ -1,7 +1,8 @@
 from uuid import UUID
 from typing import Annotated, Sequence, Any
 
-from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
+import src.databases.models.patients
+from fastapi import APIRouter, status, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
@@ -11,7 +12,6 @@ import src.data_access_layer.patients as dal_pat
 import src.data_access_layer.general as dal_gen
 import src.models.patients as mod_pat
 import src.models.general as mod_gen
-import src.databases.models as db_mod
 
 router = APIRouter(tags=['patients'], dependencies=[Depends(auth.validate_token)])
 
@@ -19,7 +19,7 @@ AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_s
 
 
 @router.patch("/verify/patients/{patient_id}", status_code=status.HTTP_200_OK, response_model=mod_pat.Patient)
-async def verify_patient(patient_id: UUID, session: AsyncSessionDep) -> db_mod.Patients:
+async def verify_patient(patient_id: UUID, session: AsyncSessionDep) -> src.databases.models.patients.Patients:
     async with session.begin():
         patient_data_access = dal_pat.Patients(session)
         patient = await patient_data_access.update(patient_id, {'is_verified': True})
@@ -31,7 +31,7 @@ async def verify_patient(patient_id: UUID, session: AsyncSessionDep) -> db_mod.P
 
 @router.get("/patients", status_code=status.HTTP_200_OK, response_model=list[mod_pat.PatientLocation])
 async def get_patients(session: AsyncSessionDep, pagination: mod_gen.pagination_dependency, response: Response)\
-                        -> Sequence[db_mod.Patients]:
+                        -> Sequence[src.databases.models.patients.Patients]:
     async with session.begin():
         data_access = dal_pat.Patients(session)
         patients, patients_number = await data_access.get_many(pagination)
@@ -46,7 +46,8 @@ async def get_patients(session: AsyncSessionDep, pagination: mod_gen.pagination_
 
 
 @router.post("/patients", status_code=status.HTTP_201_CREATED, response_model=mod_pat.PatientPassword)
-async def add_patient(patient: mod_pat.Patient, session: AsyncSessionDep, response: Response) -> db_mod.Patients:
+async def add_patient(patient: mod_pat.Patient, session: AsyncSessionDep, response: Response) \
+                      -> src.databases.models.patients.Patients:
     patient: dict[str, Any] = patient.model_dump()
     patient, password = prepare_new_patient(patient)
     async with session.begin():

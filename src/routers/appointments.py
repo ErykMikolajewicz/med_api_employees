@@ -19,10 +19,12 @@ AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_s
 async def cancel_appointment(appointment_id: UUID, session: AsyncSessionDep, background_task: BackgroundTasks):
     async with session.begin():
         data_access = dal_appointments.Appointments(session)
-        deleted_rows, patient_id = await data_access.delete(appointment_id)
+        deleted_rows, visit_data = await data_access.delete(appointment_id)
     if deleted_rows == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    background_task.add_task(notify_cancel_visit, patient_id, session)
+    patient_id = visit_data.patient_id
+    visit_start = visit_data.start
+    background_task.add_task(notify_cancel_visit, patient_id, visit_start, session)
 
 
 @router.get("/appointments")
