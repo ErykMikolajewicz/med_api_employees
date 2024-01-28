@@ -167,3 +167,5 @@ tests/secrets.json
 
 # Private files
 TODO.txt
+certificate.pem
+privatekey.pem

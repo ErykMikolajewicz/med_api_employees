@@ -28,6 +28,6 @@ test = [
 
 [tool.pdm.scripts]
 _.env_file = ".env"
-start = {cmd = "uvicorn src.main:app --host='0.0.0.0' --port=8009 --reload"}
+start = {cmd = "uvicorn src.main:app --host='0.0.0.0' --port=8009 --reload --ssl-keyfile ./privatekey.pem --ssl-certfile ./certificate.pem"}
 test = {cmd = "pytest --tb=long tests"}
 docker_build = {cmd = "docker image build --tag=employees_api ."}
