@@ -46,10 +46,10 @@ class Appointments(Base):
     )
 
     id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'))
-    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients.patients.id"))
+    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.patients.id'))
     start: Mapped[datetime] = mapped_column(primary_key=True)
     end: Mapped[datetime]
-    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients_specialists.id"), primary_key=True)
+    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients_specialists.id'), primary_key=True)
 
 
 class PatientsAccessTokens(Base):
@@ -57,7 +57,7 @@ class PatientsAccessTokens(Base):
     __table_args__ = {'schema': 'patients'}
 
     access_token: Mapped[str] = mapped_column(sqla.String(255), primary_key=True)
-    id: Mapped[UUID] = mapped_column(sqla.ForeignKey("patients.patients.id"))
+    id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.patients.id'))
     expiration_date: Mapped[datetime]
 
 
@@ -68,3 +68,42 @@ class VerifyEmail(Base):
     verification_string: Mapped[str] = mapped_column(sqla.String(255), primary_key=True)
     patient_id: Mapped[UUID]
     verification_time: Mapped[datetime]
+
+
+class MessageToSpecialist(Base):
+    __tablename__ = 'message_to_specialist'
+    __table_args__ = {'schema': 'patients'}
+
+    message_id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
+    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.patients.id'))
+    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients_specialists.id'))
+    message: Mapped[str] = mapped_column(sqla.String(2_500))
+    create_date: Mapped[datetime] = mapped_column(server_default=sqla.text('now()'))
+
+
+class Examinations(Base):
+    __tablename__ = 'examinations'
+    __table_args__ = {'schema': 'patients'}
+
+    id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
+    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.patients.id'))
+    status_id: Mapped[int] = mapped_column(sqla.ForeignKey('dicts.examination_status.id'))
+    material_drawn_by_id: Mapped[Optional[UUID]] = mapped_column(sqla.ForeignKey('employees.id'))
+    analysis_made_by_id: Mapped[Optional[UUID]] = mapped_column(sqla.ForeignKey('employees.id'))
+    analysis_approved_by_id: Mapped[Optional[UUID]] = mapped_column(sqla.ForeignKey('employees.id'))
+    material_drawn_date: Mapped[Optional[datetime]]
+    result_made_date: Mapped[Optional[datetime]]
+    approved_made_date: Mapped[Optional[datetime]]
+    create_date: Mapped[datetime] = mapped_column(server_default=sqla.text('now()'))
+
+
+class ExaminationsSchedule(Base):
+    __tablename__ = 'examinations_schedule'
+    __table_args__ = (
+        sqla.UniqueConstraint('examination_date', 'drawn_spot_id'),
+        {'schema': 'patients'})
+
+    id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
+    examination_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.examinations.id'))
+    examination_date: Mapped[datetime]
+    drawn_spot_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('drawn_spots.id'))
