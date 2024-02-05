@@ -28,6 +28,6 @@ app.include_router(src.routers.dictionaries.router)
 app.include_router(src.routers.patients.router)
 
 
-@app.get("/", response_class=RedirectResponse)  # to see docs after click startup link
+@app.get('/', response_class=RedirectResponse)  # to see docs after click startup link
 async def redirect_fastapi():
-    return "https://localhost:8009/docs"
+    return 'https://localhost:8009/docs'

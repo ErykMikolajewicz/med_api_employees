@@ -4,14 +4,17 @@ from sqlalchemy import insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import or_
 
-from src.databases.dicts_models import DatabaseDictionary, ApplicationRoles
+import src.databases.dicts_models as db_dicts
 
-DbDictionary = TypeVar('DbDictionary', bound=DatabaseDictionary)
+DbDictionary = TypeVar('DbDictionary', bound=db_dicts.DatabaseDictionary)
 
 
 class Dictionaries:
 
-    __db_dictionaries_by_names = {'application_roles': ApplicationRoles}
+    __db_dictionaries_by_names = {'application_roles': db_dicts.ApplicationRoles,
+                                  'specialists_roles': db_dicts.SpecialistsRoles,
+                                  'examination_status': db_dicts.ExaminationStatus,
+                                  'drawn_spots_types': db_dicts.DrawnSpotsTypes}
 
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session

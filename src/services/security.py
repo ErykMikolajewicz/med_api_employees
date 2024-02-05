@@ -5,14 +5,14 @@ import datetime
 import random
 import string
 
-salt_file = os.environ["SALT_FILE"]
+salt_file = os.environ['SALT_FILE']
 with open(salt_file, 'r') as file:
     salt = file.read()
 
 
 def hash_password(password: str) -> bytes:
     password_with_salt = salt + password
-    hash_ = hashlib.sha256(password_with_salt.encode("utf-8"), usedforsecurity=True)
+    hash_ = hashlib.sha256(password_with_salt.encode('utf-8'), usedforsecurity=True)
     hashed_password = hash_.digest()
     return hashed_password
 

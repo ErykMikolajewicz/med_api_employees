@@ -23,7 +23,7 @@ AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_s
 router = APIRouter(tags=['dictionaries'], dependencies=[Depends(auth.validate_token), Depends(get_dictionary)])
 
 
-@router.post("/dictionaries/{dictionary_name}/{row_id}", status_code=status.HTTP_201_CREATED,
+@router.post('/dictionaries/{dictionary_name}/{row_id}', status_code=status.HTTP_201_CREATED,
              response_model=mod_dict.Row)
 async def add_row(row_id: Annotated[int, Path(gt=0)], dictionary_name: str, dictionary_row: mod_dict.Row,
                   session: AsyncSessionDep, request: Request, response: Response) -> dal_dict.DbDictionary:
@@ -39,11 +39,11 @@ async def add_row(row_id: Annotated[int, Path(gt=0)], dictionary_name: str, dict
             raise HTTPException(status_code=400, detail='introduced data violate database constraints.')
     if new_dictionary_row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    response.headers["Location"] = f"/dictionaries/{dictionary_name}/{row_id}"
+    response.headers['Location'] = f'/dictionaries/{dictionary_name}/{row_id}'
     return new_dictionary_row
 
 
-@router.get("/dictionaries/{dictionary_name}", status_code=status.HTTP_200_OK,
+@router.get('/dictionaries/{dictionary_name}', status_code=status.HTTP_200_OK,
             response_model=Sequence[mod_dict.RowLocation])
 async def get_rows(dictionary_name: str, session: AsyncSessionDep, request: Request, is_active: Optional[bool] = None)\
                    -> Sequence[dal_dict.DbDictionary]:
@@ -58,7 +58,7 @@ async def get_rows(dictionary_name: str, session: AsyncSessionDep, request: Requ
     return dictionary_rows
 
 
-@router.delete("/dictionaries/{dictionary_name}/{row_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/dictionaries/{dictionary_name}/{row_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_row(row_id: int, session: AsyncSessionDep, request: Request) -> None:
     db_dictionary = request.state.dictionary
     async with session.begin():
@@ -74,7 +74,7 @@ async def delete_row(row_id: int, session: AsyncSessionDep, request: Request) ->
                 await data_access.delete_row(db_dictionary, row_id)
 
 
-@router.patch("/dictionaries/{dictionary_name}/{row_id}", status_code=status.HTTP_200_OK,
+@router.patch('/dictionaries/{dictionary_name}/{row_id}', status_code=status.HTTP_200_OK,
               response_model=mod_dict.Row)
 async def update_row(row_data: mod_dict.RowUpdate, row_id: int, session: AsyncSessionDep, request: Request)\
                     -> dal_dict.DbDictionary:

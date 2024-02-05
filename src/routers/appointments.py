@@ -15,7 +15,7 @@ router = APIRouter(tags=['appointments'], dependencies=[Depends(auth.validate_to
 AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
 
 
-@router.delete("/appointments/{appointment_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/appointments/{appointment_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def cancel_appointment(appointment_id: UUID, session: AsyncSessionDep, background_task: BackgroundTasks):
     async with session.begin():
         data_access = dal_appointments.Appointments(session)
@@ -27,7 +27,7 @@ async def cancel_appointment(appointment_id: UUID, session: AsyncSessionDep, bac
     background_task.add_task(notify_cancel_visit, patient_id, visit_start, session)
 
 
-@router.get("/appointments")
+@router.get('/appointments')
 async def get_appointments(session: AsyncSessionDep, pagination: mod_gen.pagination_dependency,
                            specialist_id: UUID, start, end, response):
     async with session.begin():
@@ -38,6 +38,6 @@ async def get_appointments(session: AsyncSessionDep, pagination: mod_gen.paginat
     for appointment in appointments:
         appointment.location = f'/appointments/{appointment.id}'
     link_base = '<appointments?page-number={0}&page-size={1}>; {2}'
-    links = prepare_pagination_link(link_base, pagination,appointments_number)
-    response.headers["Link"] = links
+    links = prepare_pagination_link(link_base, pagination, appointments_number)
+    response.headers['Link'] = links
     return appointments

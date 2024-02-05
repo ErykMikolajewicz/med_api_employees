@@ -10,7 +10,7 @@ from src.data_access_layer.patients import Patients
 from src.texts.patients import CancelVisit
 
 
-MED_APP_EMAIL_SECRETS_FILE = os.environ["MED_APP_EMAIL_SECRETS_FILE"]
+MED_APP_EMAIL_SECRETS_FILE = os.environ['MED_APP_EMAIL_SECRETS_FILE']
 with open(MED_APP_EMAIL_SECRETS_FILE, 'r') as file:
     med_app_email_secrets = json.load(file)
 

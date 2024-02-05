@@ -5,8 +5,6 @@ import src.databases.models.patients
 from sqlalchemy import update, delete, select, insert, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import src.databases.models as db_mod
-
 
 class Patients:
     def __init__(self, db_session: AsyncSession):

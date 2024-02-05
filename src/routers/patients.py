@@ -18,7 +18,7 @@ router = APIRouter(tags=['patients'], dependencies=[Depends(auth.validate_token)
 AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
 
 
-@router.patch("/verify/patients/{patient_id}", status_code=status.HTTP_200_OK, response_model=mod_pat.Patient)
+@router.patch('/verify/patients/{patient_id}', status_code=status.HTTP_200_OK, response_model=mod_pat.Patient)
 async def verify_patient(patient_id: UUID, session: AsyncSessionDep) -> src.databases.models.patients.Patients:
     async with session.begin():
         patient_data_access = dal_pat.Patients(session)
@@ -29,7 +29,7 @@ async def verify_patient(patient_id: UUID, session: AsyncSessionDep) -> src.data
         return patient
 
 
-@router.get("/patients", status_code=status.HTTP_200_OK, response_model=list[mod_pat.PatientLocation])
+@router.get('/patients', status_code=status.HTTP_200_OK, response_model=list[mod_pat.PatientLocation])
 async def get_patients(session: AsyncSessionDep, pagination: mod_gen.pagination_dependency, response: Response)\
                         -> Sequence[src.databases.models.patients.Patients]:
     async with session.begin():
@@ -41,11 +41,11 @@ async def get_patients(session: AsyncSessionDep, pagination: mod_gen.pagination_
         patient.location = f'/patients/{patient.id}'
     link_base = '<patients?page-number={0}&page-size={1}>; {2}'
     links = prepare_pagination_link(link_base, pagination, patients_number)
-    response.headers["Link"] = links
+    response.headers['Link'] = links
     return patients
 
 
-@router.post("/patients", status_code=status.HTTP_201_CREATED, response_model=mod_pat.PatientPassword)
+@router.post('/patients', status_code=status.HTTP_201_CREATED, response_model=mod_pat.PatientPassword)
 async def add_patient(patient: mod_pat.Patient, session: AsyncSessionDep, response: Response) \
                       -> src.databases.models.patients.Patients:
     patient: dict[str, Any] = patient.model_dump()
@@ -57,6 +57,6 @@ async def add_patient(patient: mod_pat.Patient, session: AsyncSessionDep, respon
         except IntegrityError:
             raise HTTPException(status_code=400, detail='introduced data violate database constraints.')
     patient_id = new_patient.id
-    response.headers["Location"] = f"/patients/{patient_id}"
+    response.headers['Location'] = f'/patients/{patient_id}'
     new_patient.password = password
     return new_patient

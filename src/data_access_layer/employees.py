@@ -7,8 +7,6 @@ from sqlalchemy import update, insert, delete, select
 from sqlalchemy.sql import func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import src.databases.models as db_mod
-
 
 class Employees:
     def __init__(self, db_session: AsyncSession):

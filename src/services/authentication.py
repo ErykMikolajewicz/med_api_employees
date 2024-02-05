@@ -9,7 +9,7 @@ from src.data_access_layer.employees import Employees, EmployeesTokens
 from src.data_access_layer.general import get_relational_async_session
 from src.services.security import verify_password, generate_token, get_expiration_date
 
-Token = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/employees/login"))]
+Token = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl='/employees/login'))]
 
 
 async def authenticate(email: str, password: str, session: AsyncSession) -> tuple[int, int] | None:

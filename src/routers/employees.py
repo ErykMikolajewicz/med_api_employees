@@ -17,7 +17,7 @@ router = APIRouter(tags=['employees'], dependencies=[Depends(auth.validate_token
 AsyncSessionDep = Annotated[AsyncSession, Depends(dal_gen.get_relational_async_session)]
 
 
-@router.post("/employees", status_code=status.HTTP_201_CREATED, response_model=mod_emp.Employee)
+@router.post('/employees', status_code=status.HTTP_201_CREATED, response_model=mod_emp.Employee)
 async def add_employee(employee: mod_emp.NewEmployee, session: AsyncSessionDep, response: Response, request: Request)\
                        -> src.databases.models.employees.Employees:
     employee: dict[str, Any] = employee.model_dump()
@@ -30,7 +30,7 @@ async def add_employee(employee: mod_emp.NewEmployee, session: AsyncSessionDep, 
         except IntegrityError:
             raise HTTPException(status_code=400, detail='introduced data violate database constraints.')
     employee_id = new_employee.id
-    response.headers["Location"] = f"/employees/{employee_id}"
+    response.headers['Location'] = f'/employees/{employee_id}'
     return new_employee
 
 
