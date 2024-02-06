@@ -111,14 +111,3 @@ class ExaminationsList(Base):
 
     examination_id: Mapped[UUID] = mapped_column(primary_key=True)
     examination_name: Mapped[str] = mapped_column(sqla.String(255))
-
-
-class MessageFromSpecialist(Base):
-    __tablename__ = 'message_from_specialist'
-
-    message_id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
-    patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.patients.id'))
-    specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients_specialists.id'))
-    title: Mapped[str] = mapped_column(sqla.String(255))
-    message: Mapped[str] = mapped_column(sqla.String(2_500))
-    create_date: Mapped[datetime] = mapped_column(server_default=sqla.text('now()'))

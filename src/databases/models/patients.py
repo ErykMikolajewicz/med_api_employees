@@ -70,8 +70,8 @@ class VerifyEmail(Base):
     verification_time: Mapped[datetime]
 
 
-class MessageToSpecialist(Base):
-    __tablename__ = 'message_to_specialist'
+class Messages(Base):
+    __tablename__ = 'messages'
     __table_args__ = {'schema': 'patients'}
 
     message_id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
@@ -80,6 +80,7 @@ class MessageToSpecialist(Base):
     title: Mapped[str] = mapped_column(sqla.String(255))
     message: Mapped[str] = mapped_column(sqla.String(2_500))
     create_date: Mapped[datetime] = mapped_column(server_default=sqla.text('now()'))
+    is_patient_message: bool
 
 
 class Examinations(Base):
