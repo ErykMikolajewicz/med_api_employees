@@ -4,7 +4,7 @@ from uuid import UUID
 
 import sqlalchemy as sqla
 from sqlalchemy.orm import Mapped, mapped_column
-from src.databases.relational import Base
+from src.database.relational import Base
 
 
 class DatabaseDictionary(Base):

@@ -1,10 +1,10 @@
-import smtplib
 import os
 import json
-from email.mime.text import MIMEText
 from datetime import datetime
+from email.mime.text import MIMEText
 
 from sqlalchemy.ext.asyncio import AsyncSession
+import aiosmtplib
 
 from src.data_access_layer.patients import Patients
 from src.texts.patients import CancelVisit
@@ -15,14 +15,14 @@ with open(MED_APP_EMAIL_SECRETS_FILE, 'r') as file:
     med_app_email_secrets = json.load(file)
 
 
-def send_email_to_patient(patient_email, med_app_email, password, subject, body):
+async def send_email_to_patient(patient_email, med_app_email, password, subject, body):
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = med_app_email
     msg['To'] = patient_email
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        smtp_server.login(med_app_email, password)
-        smtp_server.sendmail(med_app_email, patient_email, msg.as_string())
+    async with aiosmtplib.SMTP(hostname='smtp.gmail.com', port=465) as email_connection:
+        await email_connection.login(med_app_email, password)
+        await email_connection.sendmail(med_app_email, patient_email, msg.as_string())
 
 
 def send_sms_to_patient(patient_number, sms_text):
@@ -47,8 +47,7 @@ async def notify_cancel_visit(patient_id, visit_start: datetime, session: AsyncS
         email_body = CancelVisit.email_body
         email_body.format(visit_date=visit_start)
 
-        send_email_to_patient(patient.email, med_app_email, med_app_password, email_subject, email_body)
+        await send_email_to_patient(patient.email, med_app_email, med_app_password, email_subject, email_body)
     if patient.telephone_verified:
         send_sms_to_patient(patient.telephone, 'Twoja wizyta została odwołana.')
     notify_patient_in_app(patient_id, 'Twoja wizyta została odwołana.')
-

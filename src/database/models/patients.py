@@ -4,7 +4,7 @@ from uuid import UUID
 
 import sqlalchemy as sqla
 from sqlalchemy.orm import Mapped, mapped_column
-from src.databases.relational import Base
+from src.database.relational import Base
 
 
 class Patients(Base):
@@ -74,13 +74,13 @@ class Messages(Base):
     __tablename__ = 'messages'
     __table_args__ = {'schema': 'patients'}
 
-    message_id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
+    id: Mapped[UUID] = mapped_column(server_default=sqla.text('gen_random_uuid()'), primary_key=True)
     patient_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients.patients.id'))
     specialist_id: Mapped[UUID] = mapped_column(sqla.ForeignKey('patients_specialists.id'))
     title: Mapped[str] = mapped_column(sqla.String(255))
     message: Mapped[str] = mapped_column(sqla.String(2_500))
     create_date: Mapped[datetime] = mapped_column(server_default=sqla.text('now()'))
-    is_patient_message: bool
+    is_patient_message: Mapped[bool]
 
 
 class Examinations(Base):

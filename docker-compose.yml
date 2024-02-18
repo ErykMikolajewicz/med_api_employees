@@ -1,0 +1,72 @@
+version: "3.7"
+
+services:
+  patients_api:
+    image: patients_api
+    ports:
+      - "80:80"
+    environment:
+      ENV: DOCKER
+      POSTGRES_PASSWORD_FILE: /run/secrets/patients_postgres_password
+      SALT_FILE: /run/secrets/patients_salt
+      JWT_SECRETS_FILE: /run/secrets/patients_jwt_secret
+    networks:
+      - medicinal_network
+    secrets:
+      - patients_postgres_password
+      - patients_mongo_password
+      - patients_salt
+      - patients_jwt_secret
+    depends_on:
+      - postgres_database
+      - mongo_database
+
+  employees_api:
+    image: employees_api
+    ports:
+      - "8000:80"
+    environment:
+      ENV: DOCKER
+      POSTGRES_PASSWORD_FILE: /run/secrets/employees_postgres_password
+      SALT_FILE: /run/secrets/employees_salt
+    networks:
+      - medicinal_network
+    secrets:
+      - employees_postgres_password
+      - employees_mongo_password
+      - employees_salt
+    depends_on:
+      - postgres_database
+      - mongo_database
+     
+  postgres_database:
+    image: postgres:16.0-bookworm
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/employees_postgres_password
+    networks:
+      - medicinal_network
+    secrets:
+      - employees_postgres_password
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
+networks:
+  medicinal_network:
+    external: true
+
+secrets:
+  patients_jwt_secret:
+    file: ../patients_api/secrets/jwt_secrets.json
+  patients_postgres_password:
+    file: ../patients_api/secrets/postgres_password.txt
+  patients_salt:
+    file: ../patients_api/secrets/salt.txt
+  employees_postgres_password:
+    file: ./secrets/postgres_password.txt
+  employees_salt:
+    file: ./secrets/salt.txt

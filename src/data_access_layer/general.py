@@ -1,8 +1,7 @@
 import sqlalchemy
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-import src.databases.relational as db_rel
-import src.databases.document as db_doc
+import src.database.relational as db_rel
 
 
 def get_relational_async_session() -> db_rel.AsyncSession:
@@ -18,7 +17,3 @@ async def init_relational_database():
 
 async def close_relational_database():
     await db_rel.async_engine.dispose(close=True)
-
-
-def get_document_database() -> AsyncIOMotorDatabase:
-    return db_doc.database

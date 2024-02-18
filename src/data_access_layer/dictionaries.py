@@ -4,7 +4,7 @@ from sqlalchemy import insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import or_
 
-import src.databases.dicts_models as db_dicts
+import src.database.dicts_models as db_dicts
 
 DbDictionary = TypeVar('DbDictionary', bound=db_dicts.DatabaseDictionary)
 

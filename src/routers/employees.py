@@ -1,7 +1,7 @@
 from typing import Annotated, Any, Sequence
 from uuid import UUID
 
-import src.databases.models.employees
+import src.database.models.employees
 from fastapi import APIRouter, status, Depends, HTTPException, Response, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError

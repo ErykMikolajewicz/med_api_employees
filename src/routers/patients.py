@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import Annotated, Sequence, Any
 
-import src.databases.models.patients
+import src.database.models.patients
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError

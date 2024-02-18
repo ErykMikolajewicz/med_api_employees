@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date
 
-import src.databases.models.patients as db_mod_pat
+import src.database.models.patients as db_mod_pat
 from sqlalchemy import delete, select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 

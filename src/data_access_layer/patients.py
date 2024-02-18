@@ -1,7 +1,7 @@
 from typing import Any, Sequence, cast
 from uuid import UUID
 
-import src.databases.models.patients
+import src.database.models.patients
 from sqlalchemy import update, delete, select, insert, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
